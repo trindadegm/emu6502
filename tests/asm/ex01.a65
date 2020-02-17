@@ -1,0 +1,20 @@
+	; asm_ca65
+	; Stores the values $00, $20 and $40 on the positions $20, $21 and $22
+	lda #$00
+	sta $20
+	lda #$20
+	sta $21
+	lda #$40
+	sta $22
+
+	; Now, proceed to process those elements on a loop or something like that
+loop:
+	lda $20
+	tax
+	sta ($22,X)		; Store A into the position pointed on $22 + X
+	adc $01			; Increment A
+	sta $20			; Store the value of A on $20
+	lda $21			; Load $21 into A
+	sbc $20			; Subtract A by the value on $20
+	bmi loop		; Branch if the result was negative (back to Loop)
+	brk
