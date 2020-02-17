@@ -43,6 +43,7 @@ impl AddressingMode {
         }
     }
 
+    #[inline]
     pub fn new_immediate(data: &[u8]) -> EmuResult<Self> {
         if data.len() < 1 {
             Err(Error::new(ErrorClass::InvalidArgument, "coult not create address mode from the given slice"))
@@ -51,6 +52,7 @@ impl AddressingMode {
         }
     }
 
+    #[inline]
     pub fn new_zeropage(data: &[u8]) -> EmuResult<Self> {
         if data.len() < 1 {
             Err(Error::new(ErrorClass::InvalidArgument, "coult not create address mode from the given slice"))
@@ -59,6 +61,7 @@ impl AddressingMode {
         }
     }
 
+    #[inline]
     pub fn new_zeropagex(data: &[u8]) -> EmuResult<Self> {
         if data.len() < 1 {
             Err(Error::new(ErrorClass::InvalidArgument, "coult not create address mode from the given slice"))
@@ -67,6 +70,7 @@ impl AddressingMode {
         }
     }
 
+    #[inline]
     pub fn new_absolute(data: &[u8]) -> EmuResult<Self> {
         if data.len() < 2 {
             Err(Error::new(ErrorClass::InvalidArgument, "coult not create address mode from the given slice"))
@@ -75,6 +79,7 @@ impl AddressingMode {
         }
     }
 
+    #[inline]
     pub fn new_absolutex(data: &[u8]) -> EmuResult<Self> {
         if data.len() < 2 {
             Err(Error::new(ErrorClass::InvalidArgument, "coult not create address mode from the given slice"))
@@ -83,6 +88,7 @@ impl AddressingMode {
         }
     }
 
+    #[inline]
     pub fn new_absolutey(data: &[u8]) -> EmuResult<Self> {
         if data.len() < 2 {
             Err(Error::new(ErrorClass::InvalidArgument, "coult not create address mode from the given slice"))
@@ -91,6 +97,7 @@ impl AddressingMode {
         }
     }
 
+    #[inline]
     pub fn new_indirect(data: &[u8]) -> EmuResult<Self> {
         if data.len() < 2 {
             Err(Error::new(ErrorClass::InvalidArgument, "coult not create address mode from the given slice"))
@@ -99,6 +106,7 @@ impl AddressingMode {
         }
     }
 
+    #[inline]
     pub fn new_indirectx(data: &[u8]) -> EmuResult<Self> {
         if data.len() < 1 {
             Err(Error::new(ErrorClass::InvalidArgument, "coult not create address mode from the given slice"))
@@ -107,6 +115,7 @@ impl AddressingMode {
         }
     }
 
+    #[inline]
     pub fn new_indirecty(data: &[u8]) -> EmuResult<Self> {
         if data.len() < 1 {
             Err(Error::new(ErrorClass::InvalidArgument, "coult not create address mode from the given slice"))
@@ -115,6 +124,7 @@ impl AddressingMode {
         }
     }
 
+    #[inline]
     pub fn new_relative(data: &[u8]) -> EmuResult<Self> {
         if data.len() < 1 {
             Err(Error::new(ErrorClass::InvalidArgument, "coult not create address mode from the given slice"))
