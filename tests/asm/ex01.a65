@@ -1,20 +1,14 @@
 	; asm_ca65
-	; Stores the values $00, $20 and $40 on the positions $20, $21 and $22
+	; Copy $0a values into $0a position. Counting up
+	;;;;;
 	lda #$00
-	sta $20
-	lda #$20
-	sta $21
-	lda #$40
-	sta $22
-
-	; Now, proceed to process those elements on a loop or something like that
+	sta $00
 loop:
-	lda $20
+	lda $00		; loads A from where it was saved before
 	tax
-	sta ($22,X)		; Store A into the position pointed on $22 + X
-	adc $01			; Increment A
-	sta $20			; Store the value of A on $20
-	lda $21			; Load $21 into A
-	sbc $20			; Subtract A by the value on $20
-	bmi loop		; Branch if the result was negative (back to Loop)
-	brk
+	sta $0a,x
+
+	adc #$01		; increments A
+	sta $00 	; saves A in memory
+	sbc #$0a
+	bmi loop	; loops if a is not $0a

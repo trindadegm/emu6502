@@ -34,9 +34,11 @@ pub enum AddressingMode {
     // stored as i8, as it is always intended to be a value "relative" to the current PC, that can
     // actually mean something that is lower or greater than PC (negative or positive respectively).
     Implied,
+    Accumulator,
     Immediate(u8),
     ZeroPage(u8),
     ZeroPageX(u8),
+    ZeroPageY(u8),
     Absolute(u16),
     AbsoluteX(u16),
     AbsoluteY(u16),
@@ -53,8 +55,8 @@ impl AddressingMode {
     pub fn length(self) -> usize {
         use AddressingMode::*;
         match self {
-            Implied => 0,
-            Immediate(_) | ZeroPage(_) | ZeroPageX(_) | IndirectX(_) | IndirectY(_) | Relative(_) => 1,
+            Implied | Accumulator => 0,
+            Immediate(_) | ZeroPage(_) | ZeroPageX(_) | ZeroPageY(_) | IndirectX(_) | IndirectY(_) | Relative(_) => 1,
             Absolute(_) | AbsoluteX(_) | AbsoluteY(_) | Indirect(_) => 2,
         }
     }
@@ -83,6 +85,15 @@ impl AddressingMode {
             Err(Error::new(ErrorClass::InvalidArgument, "coult not create address mode from the given slice"))
         } else {
             Ok(AddressingMode::ZeroPageX(data[0]))
+        }
+    }
+
+    #[inline]
+    pub fn new_zeropagey(data: &[u8]) -> EmuResult<Self> {
+        if data.len() < 1 {
+            Err(Error::new(ErrorClass::InvalidArgument, "coult not create address mode from the given slice"))
+        } else {
+            Ok(AddressingMode::ZeroPageY(data[0]))
         }
     }
 
@@ -210,6 +221,7 @@ impl Instruction {
             // BMI,
             // TAX,
             // TAY,
+            // BRK,
             // ... for now
             match opcode {
                 // ADC
@@ -221,6 +233,24 @@ impl Instruction {
                 0x79 => Instruction::new(OpClass::ADC, AddressingMode::new_absolutey(&data[1..])?), // AbsoluteY
                 0x61 => Instruction::new(OpClass::ADC, AddressingMode::new_indirectx(&data[1..])?), // IndirectX
                 0x71 => Instruction::new(OpClass::ADC, AddressingMode::new_indirecty(&data[1..])?), // IndirectY
+                // BEQ
+                0xf0 => Instruction::new(OpClass::BEQ, AddressingMode::new_relative(&data[1..])?),  // Relative
+                // BMI
+                0x30 => Instruction::new(OpClass::BMI, AddressingMode::new_relative(&data[1..])?),  // Relative
+                // BRK
+                0x00 => Instruction::new(OpClass::BRK, AddressingMode::Implied),                    // Implied
+                // JMP
+                0x4c => Instruction::new(OpClass::JMP, AddressingMode::new_absolute(&data[1..])?),  // Absolute
+                0x6c => Instruction::new(OpClass::JMP, AddressingMode::new_indirect(&data[1..])?),  // Indirect
+                // LDA
+                0xa9 => Instruction::new(OpClass::LDA, AddressingMode::new_immediate(&data[1..])?), // Immediate
+                0xa5 => Instruction::new(OpClass::LDA, AddressingMode::new_zeropage(&data[1..])?),  // ZeroPage
+                0xb5 => Instruction::new(OpClass::LDA, AddressingMode::new_zeropagex(&data[1..])?), // ZeroPageX
+                0xad => Instruction::new(OpClass::LDA, AddressingMode::new_absolute(&data[1..])?),  // Absolute
+                0xbd => Instruction::new(OpClass::LDA, AddressingMode::new_absolutex(&data[1..])?), // AbsoluteX
+                0xb9 => Instruction::new(OpClass::LDA, AddressingMode::new_absolutey(&data[1..])?), // AbsoluteY
+                0xa1 => Instruction::new(OpClass::LDA, AddressingMode::new_indirectx(&data[1..])?), // IndirectX
+                0xb1 => Instruction::new(OpClass::LDA, AddressingMode::new_indirecty(&data[1..])?), // IndirectY
                 // SBC
                 0xe9 => Instruction::new(OpClass::SBC, AddressingMode::new_immediate(&data[1..])?), // Immediate
                 0xe5 => Instruction::new(OpClass::SBC, AddressingMode::new_zeropage(&data[1..])?),  // ZeroPage
@@ -238,22 +268,6 @@ impl Instruction {
                 0x99 => Instruction::new(OpClass::STA, AddressingMode::new_absolutey(&data[1..])?), // AbsoluteY
                 0x81 => Instruction::new(OpClass::STA, AddressingMode::new_indirectx(&data[1..])?), // IndirectX
                 0x91 => Instruction::new(OpClass::STA, AddressingMode::new_indirecty(&data[1..])?), // IndirectY
-                // LDA
-                0xa9 => Instruction::new(OpClass::LDA, AddressingMode::new_immediate(&data[1..])?), // Immediate
-                0xa5 => Instruction::new(OpClass::LDA, AddressingMode::new_zeropage(&data[1..])?),  // ZeroPage
-                0xb5 => Instruction::new(OpClass::LDA, AddressingMode::new_zeropagex(&data[1..])?), // ZeroPageX
-                0xad => Instruction::new(OpClass::LDA, AddressingMode::new_absolute(&data[1..])?),  // Absolute
-                0xbd => Instruction::new(OpClass::LDA, AddressingMode::new_absolutex(&data[1..])?), // AbsoluteX
-                0xb9 => Instruction::new(OpClass::LDA, AddressingMode::new_absolutey(&data[1..])?), // AbsoluteY
-                0xa1 => Instruction::new(OpClass::LDA, AddressingMode::new_indirectx(&data[1..])?), // IndirectX
-                0xb1 => Instruction::new(OpClass::LDA, AddressingMode::new_indirecty(&data[1..])?), // IndirectY
-                // JMP
-                0x4c => Instruction::new(OpClass::JMP, AddressingMode::new_absolute(&data[1..])?),  // Absolute
-                0x6c => Instruction::new(OpClass::JMP, AddressingMode::new_indirect(&data[1..])?),  // Indirect
-                // BEQ
-                0xf0 => Instruction::new(OpClass::BEQ, AddressingMode::new_relative(&data[1..])?),  // Relative
-                // BMI
-                0x30 => Instruction::new(OpClass::BMI, AddressingMode::new_relative(&data[1..])?),  // Relative
                 // TAX
                 0xaa => Instruction::new(OpClass::TAX, AddressingMode::Implied),                    // Implied
                 // TAY
